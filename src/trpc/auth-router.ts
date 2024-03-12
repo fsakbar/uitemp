@@ -1,4 +1,4 @@
-  import { AuthCredentialsValidator } from "@/lib/validators/account-credentials-validator";
+import { AuthCredentialsValidator } from "@/lib/validators/account-credentials-validator";
 import { publicProcedure, router } from "./trpc";
 import { Input } from "postcss";
 import { getPayloadClient } from "@/get-payload";
