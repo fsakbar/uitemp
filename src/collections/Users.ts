@@ -3,13 +3,18 @@ import { CollectionConfig } from "payload/types";
 
 const Users: CollectionConfig = {
     slug: "users",
+    auth: true, 
+    access: {
+        read: () => true,
+        create: () => true
+    },
     fields: [
         {
             name: 'role',
             type: 'select',
             options: [
-                {label: 'admin', value: 'admin'},
-                {label: 'user', value: 'user'}
+                {label: 'Admin', value: 'admin'},
+                {label: 'User', value: 'user'}
             ]
         }
     ]
