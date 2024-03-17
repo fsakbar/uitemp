@@ -5,9 +5,16 @@ import { slateEditor } from "@payloadcms/richtext-slate";
 import path from "path";
 import Users from "./collections/Users";
 
+import dotenv from "dotenv"
+import { Product } from "./collections/Products/Product";
+
+dotenv.config({
+  path: path.resolve(__dirname, "../.env"),
+})
+
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || "",
-  collections: [Users],
+  collections: [Users, Product],
   routes: {
     admin: "/sell",
   },
