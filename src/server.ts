@@ -1,47 +1,51 @@
-import express from "express"
-import { getPayloadClient } from "./get-payload"
-import { nextApp, nextHandler } from "./next-utils"
-import * as trpcExpress from "@trpc/server/adapters/express"
-import { appRouter } from "./trpc"
-import cors from 'cors';
-import { inferAsyncReturnType } from "@trpc/server"
+import express from "express";
+import { getPayloadClient } from "./get-payload";
+import { nextApp, nextHandler } from "./next-utils";
+import * as trpcExpress from "@trpc/server/adapters/express";
+import { appRouter } from "./trpc";
+import cors from "cors";
+import { inferAsyncReturnType } from "@trpc/server";
 
-const app = express()
-const PORT = Number(process.env.PORT) || 3000
+const app = express();
+const PORT = Number(process.env.PORT) || 3000;
 
-const createContext = ({req, res}: trpcExpress.CreateExpressContextOptions) => ({res, req})
-export type ExpressContext = inferAsyncReturnType<typeof createContext>
+app.use(cors());
+
+const createContext = ({
+  req,
+  res,
+}: trpcExpress.CreateExpressContextOptions) => ({ res, req });
+export type ExpressContext = inferAsyncReturnType<typeof createContext>;
 
 const start = async () => {
-    const payload = await getPayloadClient({
-        initOptions: {
-            express: app,
-            onInit: async (cms) => {
-                cms.logger.info(`Admin URL ${cms.getAdminURL()}`)
-            },
-        },
+  const payload = await getPayloadClient({
+    initOptions: {
+      express: app,
+      onInit: async (cms) => {
+        cms.logger.info(`Admin URL ${cms.getAdminURL()}`);
+      },
+    },
+  });
+
+  app.use(
+    "/api/trpc",
+    trpcExpress.createExpressMiddleware({
+      router: appRouter,
+      createContext,
     })
+  );
 
-    app.use(cors())
+  app.use((req, res) => nextHandler(req, res));
 
-    app.use(
-        '/api/trpc',
-        trpcExpress.createExpressMiddleware({
-          router: appRouter,
-          createContext,
-        })
-      )
+  nextApp.prepare().then(() => {
+    payload.logger.info("Next.js Started");
 
-    app.use((req, res) => nextHandler(req, res))
+    app.listen(PORT, async () => {
+      payload.logger.info(
+        `Next.js App URL: ${process.env.NEXT_PUBLIC_SERVER_URL}`
+      );
+    });
+  });
+};
 
-    nextApp.prepare().then(() => {
-        payload.logger.info('Next.js Started')
-
-        app.listen(PORT, async () => {
-            payload.logger.info(`Next.js App URL: ${process.env.NEXT_PUBLIC_SERVER_URL}`)
-        })
-    })
-
-}
-
-start()
+start();
